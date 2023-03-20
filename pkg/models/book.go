@@ -31,21 +31,27 @@ func GetAllBooks() []Book {
 	return Books
 }
 
-func GetBookById(Id int64) (*Book, *gorm.DB) {
+func GetBookById(Id int64) (*Book, *gorm.DB, error) {
 	var book Book
-	db := db.Where("ID=?", Id).Find(&book)
-	return &book, db
+	if db := db.Where("ID=?", Id).Find(&book).First(&book); db.Error != nil {
+		return nil, db, db.Error
+	}
+	return &book, db, nil
 }
 
-func UpdateBook(Id int64, updatedBook *Book) (*Book, *gorm.DB) {
-	db := db.Model(Book{}).Where("ID = ?", Id).Updates(&updatedBook)
-	b, _ := GetBookById(Id)
-	return b, db
+func UpdateBook(Id int64, updatedBook *Book) (*Book, *gorm.DB, error) {
+	if db := db.Model(Book{}).Where("ID = ?", Id).Updates(&updatedBook).First(&updatedBook); db.Error != nil {
+		return nil, db, db.Error
+	}
+	b, _, _ := GetBookById(Id)
+	return b, db, nil
 }
 
-func DeleteBook(ID int64) (*Book, *gorm.DB) {
+func DeleteBook(Id int64) (*Book, *gorm.DB, error) {
 	var book Book
-	db.Where("ID=?", ID).Delete(&book)
-	db := db.Unscoped().Where("ID=?", ID).Find(&book)
-	return &book, db
+	if db := db.Where("ID=?", Id).Find(&book).First(&book).Delete(&book); db.Error != nil {
+		return nil, db, db.Error
+	}
+	db.Unscoped().Where("ID=?", Id).Find(&book)
+	return &book, db, nil
 }

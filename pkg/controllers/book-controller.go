@@ -28,7 +28,15 @@ func GetBookById(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println("error while parsing")
 	}
-	bookDetails, _ := models.GetBookById(ID)
+	bookDetails, _, err := models.GetBookById(ID)
+	if err != nil {
+		errorMap := map[string]string{"error": err.Error(), "code": "404"}
+		errorJson, _ := json.Marshal(errorMap)
+		w.Header().Set("Content-Type", "pkglication/json")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(errorJson)
+		return
+	}
 	res, _ := json.Marshal(bookDetails)
 	w.Header().Set("Content-Type", "pkglication/json")
 	w.WriteHeader(http.StatusOK)
@@ -54,7 +62,15 @@ func UpdateBook(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println("error while parsing")
 	}
-	newBook, _ := models.UpdateBook(ID, UpdatedBook)
+	newBook, _, err := models.UpdateBook(ID, UpdatedBook)
+	if err != nil {
+		errorMap := map[string]string{"error": err.Error(), "code": "404"}
+		errorJson, _ := json.Marshal(errorMap)
+		w.Header().Set("Content-Type", "pkglication/json")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(errorJson)
+		return
+	}
 	res, _ := json.Marshal(newBook)
 	w.Header().Set("Content-Type", "pkglication/json")
 	w.WriteHeader(http.StatusOK)
@@ -68,7 +84,15 @@ func DeleteBook(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println("error while parsing")
 	}
-	book, _ := models.DeleteBook(ID)
+	book, _, err := models.DeleteBook(ID)
+	if err != nil {
+		errorMap := map[string]string{"error": err.Error(), "code": "404"}
+		errorJson, _ := json.Marshal(errorMap)
+		w.Header().Set("Content-Type", "pkglication/json")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(errorJson)
+		return
+	}
 	res, _ := json.Marshal(book)
 	w.Header().Set("Content-Type", "pkglication/json")
 	w.WriteHeader(http.StatusOK)
