@@ -1,2 +1,3 @@
 # GO_API_POC
-Go API PoC
+
+Go API PoC with JWT authentication
