@@ -46,8 +46,9 @@ func GetBookById(w http.ResponseWriter, r *http.Request) {
 func CreateBook(w http.ResponseWriter, r *http.Request) {
 	CreateBook := &models.Book{}
 	utils.ParseBody(r, CreateBook)
-
-	book, db := CreateBook.CreateBook()
+	email := r.Header.Get("email")
+	user, db := models.GetUserByEmail(email)
+	book, db := CreateBook.CreateBook(user.ID)
 	if db.Error != nil {
 		errorMap := map[string]string{"error": db.Error.Error(), "code": "404"}
 		errorJson, _ := json.Marshal(errorMap)

@@ -1,26 +1,20 @@
 package models
 
 import (
-	"github.com/bengimbel/go-bookstore/pkg/config"
 	"gorm.io/gorm"
 )
 
-var db *gorm.DB
-
+//Foreign key is USER ID
 type Book struct {
 	gorm.Model
 	Name        string `json:"name"`
 	Author      string `json:"author"`
 	Publication string `json:"publication"`
+	UserID      uint
 }
 
-func init() {
-	config.Main()
-	db = config.GetDB()
-	db.AutoMigrate(&Book{})
-}
-
-func (book *Book) CreateBook() (*Book, *gorm.DB) {
+func (book *Book) CreateBook(id uint) (*Book, *gorm.DB) {
+	book.UserID = id
 	if db := db.Create(&book); db.Error != nil {
 		return nil, db
 	}

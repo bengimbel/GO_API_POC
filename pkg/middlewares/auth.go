@@ -17,18 +17,18 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 		bearerToken := strings.Split(tokenString, " ")
-		err := auth.ValidateToken(bearerToken[1])
+		claims, err := auth.ValidateToken(bearerToken[1])
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			w.Write([]byte("Error verifying JWT token: " + err.Error()))
 			return
 		}
-		// name := claims.(jwt.MapClaims)["name"].(string)
-		// role := claims.(jwt.MapClaims)["role"].(string)
-
-		// r.Header.Set("name", name)
-		// r.Header.Set("role", role)
-
+		name := claims.Name
+		role := claims.Role
+		email := claims.Email
+		r.Header.Set("name", name)
+		r.Header.Set("role", role)
+		r.Header.Set("email", email)
 		next.ServeHTTP(w, r)
 	})
 }

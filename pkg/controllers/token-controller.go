@@ -12,6 +12,8 @@ import (
 type TokenRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+	Role     string `json:"role"`
+	Name     string `json:"name"`
 }
 
 func GenerateToken(w http.ResponseWriter, r *http.Request) {
@@ -36,7 +38,7 @@ func GenerateToken(w http.ResponseWriter, r *http.Request) {
 		w.Write(errorJson)
 		return
 	}
-	tokenString, err := auth.GenerateJWT(User.Email, User.Username)
+	tokenString, err := auth.GenerateJWT(User.Email, User.Username, User.Role, User.Name)
 	if err != nil {
 		errorMap := map[string]string{"error": "Error creating token", "code": "500"}
 		errorJson, _ := json.Marshal(errorMap)

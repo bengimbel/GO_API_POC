@@ -1,12 +1,9 @@
 package models
 
 import (
-	"github.com/bengimbel/go-bookstore/pkg/config"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
-
-var database *gorm.DB
 
 type User struct {
 	gorm.Model
@@ -14,12 +11,7 @@ type User struct {
 	Username string `json:"username" gorm:"unique"`
 	Email    string `json:"email" gorm:"unique"`
 	Password string `json:"password"`
-}
-
-func init() {
-	config.Main()
-	database = config.GetDB()
-	database.AutoMigrate(&User{})
+	Role     string `json:"role" gorm:"default:'user'"`
 }
 
 func (user *User) HashPassword(password string) error {
@@ -36,6 +28,14 @@ func (user *User) CheckPassword(providedPassword string) error {
 		return err
 	}
 	return nil
+}
+
+func GetUserByEmail(email string) (*User, *gorm.DB) {
+	var user User
+	if db := db.Where("email=?", email).Find(&user).First(&user); db.Error != nil {
+		return nil, db
+	}
+	return &user, db
 }
 
 func (user *User) CreateUser() (*User, *gorm.DB) {
