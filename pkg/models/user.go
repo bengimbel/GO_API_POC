@@ -1,8 +1,6 @@
 package models
 
 import (
-	"log"
-
 	"github.com/bengimbel/go-bookstore/pkg/config"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -30,7 +28,6 @@ func (user *User) HashPassword(password string) error {
 		return err
 	}
 	user.Password = string(bytes)
-	log.Println(user, "HAS")
 	return nil
 }
 func (user *User) CheckPassword(providedPassword string) error {
@@ -41,14 +38,16 @@ func (user *User) CheckPassword(providedPassword string) error {
 	return nil
 }
 
-func (user *User) CreateUser(newUser *User) *User {
-	db.Create(&user)
-	return user
+func (user *User) CreateUser() (*User, *gorm.DB) {
+	if db := db.Create(&user); db.Error != nil {
+		return nil, db
+	}
+	return user, db
 }
 
-func (user *User) GetUserByEmail(email string) (*User, *gorm.DB, error) {
+func (user *User) GetUserByEmail(email string) (*User, *gorm.DB) {
 	if db := db.Where("email=?", email).Find(&user).First(&user); db.Error != nil {
-		return nil, db, db.Error
+		return nil, db
 	}
-	return user, db, nil
+	return user, db
 }

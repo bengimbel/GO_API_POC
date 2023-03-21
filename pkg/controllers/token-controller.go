@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 
 	"github.com/bengimbel/go-bookstore/pkg/auth"
@@ -17,42 +16,37 @@ type TokenRequest struct {
 
 func GenerateToken(w http.ResponseWriter, r *http.Request) {
 	User := &models.User{}
-
 	RequestObj := &TokenRequest{}
 	utils.ParseBody(r, RequestObj)
-	// if err := context.ShouldBindJSON(&request); err != nil {
-	// 	context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	// 	context.Abort()
-	// 	return
-	// }
-	// check if email exists and password is correct
-	_, _, err := User.GetUserByEmail(RequestObj.Email)
-
-	if err != nil {
-		log.Println("CANNOT FIND EMAIL")
-		// context.JSON(http.StatusInternalServerError, gin.H{"error": record.Error.Error()})
-		// context.Abort()
+	_, db := User.GetUserByEmail(RequestObj.Email)
+	if db.Error != nil {
+		errorMap := map[string]string{"error": "Email not found", "code": "404"}
+		errorJson, _ := json.Marshal(errorMap)
+		w.Header().Set("Content-Type", "pkglication/json")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(errorJson)
 		return
 	}
 	credentialError := User.CheckPassword(RequestObj.Password)
 	if credentialError != nil {
-		log.Println("BAD PASSWORD")
-		// context.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
-		// context.Abort()
+		errorMap := map[string]string{"error": "Incorrect password", "code": "401"}
+		errorJson, _ := json.Marshal(errorMap)
+		w.Header().Set("Content-Type", "pkglication/json")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(errorJson)
 		return
 	}
 	tokenString, err := auth.GenerateJWT(User.Email, User.Username)
 	if err != nil {
-		// context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		// context.Abort()
-		log.Println("CANNOT MAKE TOKEN")
+		errorMap := map[string]string{"error": "Error creating token", "code": "500"}
+		errorJson, _ := json.Marshal(errorMap)
+		w.Header().Set("Content-Type", "pkglication/json")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(errorJson)
 		return
 	}
-	// context.JSON(http.StatusOK, gin.H{"token": tokenString})
 	returnV := map[string]string{"token": tokenString}
 	res, _ := json.Marshal(returnV)
-	// b := CreateBook.CreateBook()
-	// res, _ := json.Marshal(b)
 	w.WriteHeader(http.StatusOK)
 	w.Write(res)
 }

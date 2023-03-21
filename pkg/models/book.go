@@ -20,9 +20,11 @@ func init() {
 	db.AutoMigrate(&Book{})
 }
 
-func (b *Book) CreateBook() *Book {
-	db.Create(&b)
-	return b
+func (book *Book) CreateBook() (*Book, *gorm.DB) {
+	if db := db.Create(&book); db.Error != nil {
+		return nil, db
+	}
+	return book, db
 }
 
 func GetAllBooks() []Book {
@@ -31,27 +33,27 @@ func GetAllBooks() []Book {
 	return Books
 }
 
-func GetBookById(Id int64) (*Book, *gorm.DB, error) {
+func GetBookById(Id int64) (*Book, *gorm.DB) {
 	var book Book
 	if db := db.Where("ID=?", Id).Find(&book).First(&book); db.Error != nil {
-		return nil, db, db.Error
+		return nil, db
 	}
-	return &book, db, nil
+	return &book, db
 }
 
-func UpdateBook(Id int64, updatedBook *Book) (*Book, *gorm.DB, error) {
+func UpdateBook(Id int64, updatedBook *Book) (*Book, *gorm.DB) {
 	if db := db.Model(Book{}).Where("ID = ?", Id).Updates(&updatedBook).First(&updatedBook); db.Error != nil {
-		return nil, db, db.Error
+		return nil, db
 	}
-	b, _, _ := GetBookById(Id)
-	return b, db, nil
+	b, db := GetBookById(Id)
+	return b, db
 }
 
-func DeleteBook(Id int64) (*Book, *gorm.DB, error) {
+func DeleteBook(Id int64) (*Book, *gorm.DB) {
 	var book Book
 	if db := db.Where("ID=?", Id).Find(&book).First(&book).Delete(&book); db.Error != nil {
-		return nil, db, db.Error
+		return nil, db
 	}
 	db.Unscoped().Where("ID=?", Id).Find(&book)
-	return &book, db, nil
+	return &book, db
 }
