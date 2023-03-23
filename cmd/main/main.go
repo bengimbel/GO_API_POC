@@ -12,10 +12,10 @@ import (
 func main() {
 	r := mux.NewRouter()
 	userRoutes := r.PathPrefix("/user").Subrouter()
-	bookRoutes := r.PathPrefix("/books").Subrouter()
+	postRoutes := r.PathPrefix("/posts").Subrouter()
 	routes.RegisterUserRoutes(userRoutes)
-	routes.RegisterBookStoreRoutes(bookRoutes)
-	bookRoutes.Use(middlewares.AuthMiddleware)
+	routes.RegisterPostRoutes(postRoutes)
+	postRoutes.Use(middlewares.AuthMiddleware)
 	http.Handle("/", r)
 	log.Fatal(http.ListenAndServe("localhost:9010", r))
 }
