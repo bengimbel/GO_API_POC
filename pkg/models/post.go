@@ -18,7 +18,7 @@ type Post struct {
 
 func (post *Post) CreatePost(id int64) (*Post, *gorm.DB) {
 	post.UserID = id
-	if db := db.Create(&post); db.Error != nil {
+	if db := db.Create(post); db.Error != nil {
 		return nil, db
 	}
 	post, db := GetPostById(post.ID)

@@ -16,7 +16,7 @@ type Comment struct {
 func (comment *Comment) CreateComment(id int64, postId int64) (*Comment, *gorm.DB) {
 	comment.UserID = id
 	comment.PostID = postId
-	if db := db.Preload("Post").Create(&comment); db.Error != nil {
+	if db := db.Preload("Post").Create(comment); db.Error != nil {
 		return nil, db
 	}
 	return comment, db

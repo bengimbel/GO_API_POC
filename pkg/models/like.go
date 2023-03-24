@@ -14,7 +14,7 @@ type Like struct {
 func (like *Like) CreateLike(id int64, postId int64) (*Like, *gorm.DB) {
 	like.UserID = id
 	like.PostID = postId
-	if db := db.Preload("User").Preload("Post").Create(&like); db.Error != nil {
+	if db := db.Preload("User").Preload("Post").Create(like); db.Error != nil {
 		return nil, db
 	}
 	return like, db
